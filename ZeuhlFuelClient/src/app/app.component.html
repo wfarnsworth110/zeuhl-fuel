@@ -1,9 +1,98 @@
-<main style="padding: 2rem; font-family: sans-serif;">
-  <h1>Guess what?</h1>
+<main style="padding: 2.5rem; font-family: system-ui, sans-serif; background: #121214; color: #e1e1e6; min-height: 100vh;">
 
-  <div style="margin-top: 1.5rem; padding: 1rem; background: #eee; border-radius: 4px;">
-    <strong>{{ apiMessage() }}</strong>
+  <header style="border-bottom: 1px solid #29292e; padding-bottom: 1rem; margin-bottom: 2rem;">
+    <h1 style="color: #00b37e; margin: 0;">{{ title }}</h1>
+    <p style="color: #8d8d99; margin: 0.5rem 0 0 0;">Find chords to sit under a selected melody note</p>
+  </header>
+
+  <section style="background: #202024; border: 1px solid #323238; border-radius: 8px; padding: 1.5rem; margin-bottom: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <div>
+      <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #8d8d99; text-transform: uppercase;">Target Melody Note</label>
+      <select [value]="selectedNote" (change)="selectedNote = $any($event.target).value; calculateMatrix()"
+              style="background: #121214; color: #e1e1e6; border: 1px solid #323238; padding: 0.5rem 1rem; border-radius: 4px; font-size: 1rem; outline: none; cursor: pointer;">
+        @for (note of availableNotes; track note) {
+          <option [value]="note">{{ note }}</option>
+        }
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+      <div>
+        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #8d8d99; text-transform: uppercase;">Standard Tensions (Non-Dominant)</label>
+        <div style="display: flex; gap: 1rem; background: #121214; padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid #323238;">
+          @for (degree of availableNonDom; track degree) {
+            <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.95rem;">
+              <input type="checkbox" [checked]="selectedNonDom.includes(degree)"
+                     (change)="toggleNonDom(degree, $any($event.target).checked); calculateMatrix()" style="accent-color: #00b37e;" />
+              {{ degree }}
+            </label>
+          }
+        </div>
+      </div>
+
+      <div>
+        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: #8d8d99; text-transform: uppercase;">Altered Tensions (Dominant)</label>
+        <div style="display: flex; gap: 1rem; background: #121214; padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid #323238;">
+          @for (degree of availableDom; track degree) {
+            <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.95rem;">
+              <input type="checkbox" [checked]="selectedDom.includes(degree)"
+                     (change)="toggleDom(degree, $any($event.target).checked); calculateMatrix()" style="accent-color: #e83e8c;" />
+              {{ degree }}
+            </label>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="display: flex; gap: 3rem; flex-wrap: wrap;">
+
+    <section style="flex: 1; min-width: 300px;">
+      <h2 style="color: #00b37e; border-bottom: 1px solid #29292e; padding-bottom: 0.5rem;">Non-Dominant Matrices</h2>
+      @for (group of nonDomResults(); track group.targetDegree) {
+        <div style="margin-top: 1.5rem; border-left: 3px solid #00b37e; padding-left: 1rem;">
+          <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; color: #8d8d99;">As the {{ group.targetDegree }}th:</h3>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            @for (chord of group.chords; track chord.name) {
+              <div style="background: #202024; border: 1px solid #323238; border-radius: 6px; padding: 1rem; min-width: 200px;">
+                <h4 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #e1e1e6;">{{ chord.name }}</h4>
+                <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                  @for (note of chord.notes; track note) {
+                    <span [style.color]="note === selectedNote ? '#00b37e' : '#8d8d99'" style="font-family: monospace; font-size: 0.9rem; font-weight: bold;">
+                      {{ note }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    <section style="flex: 1; min-width: 300px;">
+      <h2 style="color: #e83e8c; border-bottom: 1px solid #29292e; padding-bottom: 0.5rem;">Dominant Matrices</h2>
+      @for (group of domResults(); track group.targetDegree) {
+        <div style="margin-top: 1.5rem; border-left: 3px solid #e83e8c; padding-left: 1rem;">
+          <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; color: #8d8d99;">As the {{ group.targetDegree }}:</h3>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            @for (chord of group.chords; track chord.name) {
+              <div style="background: #202024; border: 1px solid #323238; border-radius: 6px; padding: 1rem; min-width: 200px;">
+                <h4 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #e1e1e6;">{{ chord.name }}</h4>
+                <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                  @for (note of chord.notes; track note) {
+                    <span [style.color]="note === selectedNote ? '#e83e8c' : '#8d8d99'" style="font-family: monospace; font-size: 0.9rem; font-weight: bold;">
+                      {{ note }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
   </div>
 </main>
-
-<router-outlet />

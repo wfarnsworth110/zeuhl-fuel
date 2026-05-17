@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
 // Use the defined CORS policy
 app.UseCors("AllowAngular");
 
-// Hello world endpoint
+// Hello world endpoint. Not useful anymore.
 app.MapGet("/api/hello", () => new { message = "Chicken butt!" })
    .WithName("GetHello");
 
@@ -106,9 +106,10 @@ app.MapGet("/api/jazz/harmonize-dominant", (string melodyNote, [FromQuery] strin
     // Dominant chord templates
     var templates = new Dictionary<string, Dictionary<string, int>>
     {
-        ["7"]    = new() { {"1", 0}, {"b9", 1}, {"9", 2}, {"#9", 3}, {"3", 4}, {"#11", 6}, {"5", 7}, {"b13", 8}, {"13", 9}, {"b7", 10} },
-        ["7sus"] = new() { {"1", 0}, {"b9", 1}, {"9", 2}, {"#9", 3}, {"b11", 4}, {"4", 5}, {"5", 7}, {"b13", 8}, {"13", 9}, {"b7", 10} },
-        ["+7"]   = new() { {"1", 0}, {"b9", 1}, {"9", 2}, {"#9", 3}, {"3", 4}, {"#11", 6}, {"#5", 8}, {"13", 9}, {"b7", 10} }
+        // Main change: Simplified degrees 3, 5, and 7: 4 of 7sus is now referred to as 3, #5 is referred to as 5, and b7 is referred to as 7.
+        ["7"]    = new() { {"1", 0}, {"b9", 1}, {"9", 2}, {"#9", 3}, {"3", 4}, {"#11", 6}, {"5", 7}, {"b13", 8}, {"13", 9}, {"7", 10} },
+        ["7sus"] = new() { {"1", 0}, {"b9", 1}, {"9", 2}, {"#9", 3}, {"b11", 4}, {"3", 5}, {"5", 7}, {"b13", 8}, {"13", 9}, {"7", 10} },
+        ["+7"]   = new() { {"1", 0}, {"b9", 1}, {"9", 2}, {"#9", 3}, {"3", 4}, {"#11", 6}, {"5", 8}, {"13", 9}, {"7", 10} }
     };
 
     int targetIndex = chromatic.IndexOf(melodyNote);

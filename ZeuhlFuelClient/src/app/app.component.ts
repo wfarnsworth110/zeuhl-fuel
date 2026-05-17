@@ -1,11 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-
-// Define an interface matching the expected structure of the API response
-interface ApiResponse {
-  message: string;
-}
+import { JazzApiService } from './services/jazz-api.service';
 
 @Component({
   selector: 'app-root',
@@ -13,22 +8,13 @@ interface ApiResponse {
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
   title = 'ZeuhlFuelClient';
-  private http = inject(HttpClient);
+  private jazzApiService = inject(JazzApiService);
 
-  apiMessage = signal<string>('Loading...');
+  apiMessage = this.jazzApiService.apiMessage;
 
   ngOnInit(): void {
-    this.http.get<ApiResponse>('http://localhost:5206')
-      .subscribe({
-        next: (data) => {
-          this.apiMessage.set(data.message);
-        },
-        error: (err) => {
-          this.apiMessage.set('Error fetching data from API');
-          console.error('API error:', err);
-        }
-      });
+    this.jazzApiService.fetchBackendStatus();
   }
 }
